@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using UnityEngine.Splines;
 
 [ExecuteInEditMode]
 [RequireComponent(typeof(MeshFilter))]
@@ -22,6 +23,7 @@ public class SplineRoad : MonoBehaviour
         _meshFilter = GetComponent<MeshFilter>();
         _meshRenderer = GetComponent<MeshRenderer>();
         _splineSampler = GetComponent<SplineSampler>();
+        Spline.Changed += OnSplineChanged;
     }
 
     private void Update()
@@ -110,7 +112,7 @@ public class SplineRoad : MonoBehaviour
 
     private void GenerateCollider(Mesh mesh)
     {
-        if (_collider == null)
+        if (!TryGetComponent(out _collider))
         {
             _collider = gameObject.AddComponent<MeshCollider>();
         }
@@ -164,18 +166,22 @@ public class SplineRoad : MonoBehaviour
             Gizmos.DrawLine(_vertsP1[i], _vertsP2[i]);
         }
     }
+
+    private void OnSplineChanged(Spline spline, int arg2, SplineModification modification)
+    {
+        Rebuild();
+    }
+
+    private void Rebuild()
+    {
+        BuildMesh();
+    }
+
+    private void OnDisable()
+    {
+        Spline.Changed -= OnSplineChanged;
+    }
 }
 
-//private void OnEnable()
-//{
-//    Spline.Changed += OnSplineChanged;
-//}
-//private void OnDisable()
-//{
-//    Spline.Changed += OnSplineChanged;
-//}
 
-//private void OnSplineChanged(Spline spline, int arg2, SplineModification modification)
-//{
-//    Rebuild();
-//}
+
